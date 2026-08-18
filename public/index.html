@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Jeremiah Coin Alerts</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #07111f;
+      color: white;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 25px 18px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #a9b4c4;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: #111d2d;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #07111f;
+      color: white;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #16a34a;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #status {
+      margin-top: 15px;
+      padding: 12px;
+      background: #07111f;
+      border-radius: 10px;
+      min-height: 45px;
+      color: #d1d5db;
+      word-break: break-word;
+    }
+
+    .warning {
+      color: #fbbf24;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      text-align: center;
+      color: #64748b;
+      font-size: 13px;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🚨 Jeremiah Coin Alerts</h1>
+
+  <div class="subtitle">
+    Solana Wallet Tracker — Version 1
+  </div>
+
+  <div class="card">
+
+    <label for="wallet">
+      Solana Wallet Address
+    </label>
+
+    <input
+      id="wallet"
+      type="text"
+      placeholder="Paste Solana wallet address here"
+    >
+
+    <button onclick="trackWallet()">
+      🔍 Track Wallet
+    </button>
+
+    <div id="status">
+      Enter a Solana wallet address to begin.
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <strong>🔔 Coin Alert System</strong>
+
+    <p>
+      Jeremiah Coin Alerts is designed to help monitor
+      Solana wallet activity and identify transactions
+      worth investigating.
+    </p>
+
+    <p class="warning">
+      ⚠️ An alert is not a guarantee that a token will make
+      money. Always verify the token, liquidity, holders and
+      contract before trading.
+    </p>
+
+  </div>
+
+  <div class="footer">
+    Jeremiah Coin Alerts V1
+  </div>
+
+</div>
+
+<script>
+
+async function trackWallet() {
+
+  const wallet =
+    document.getElementById("wallet").value.trim();
+
+  const status =
+    document.getElementById("status");
+
+  if (!wallet) {
+
+    status.innerHTML =
+      "⚠️ Please enter a Solana wallet address.";
+
+    return;
+  }
+
+  status.innerHTML =
+    "⏳ Checking wallet activity...";
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/wallet/" +
+        encodeURIComponent(wallet)
+      );
+
+    if (!response.ok) {
+      throw new Error("Unable to retrieve wallet data.");
+    }
+
+    const data = await response.json();
+
+    status.innerHTML =
+      "✅ Wallet connected.<br><br>" +
+      "Transactions found: " +
+      (data.transactions?.length ?? data.length ?? 0);
+
+  }
+
+  catch (error) {
+
+    status.innerHTML =
+      "❌ Could not load wallet activity.<br>" +
+      "The server must be running for live tracking.";
+
+  }
+}
+
+</script>
+
+</body>
+</html>
