@@ -193,10 +193,20 @@ async function trackWallet() {
 
     const transactions = data.transactions || [];
 
-status.innerHTML =
-      "✅ Wallet connected.<br><br>" +
-      "Transactions found: " +
-      (data.transactions?.length ?? data.length ?? 0);
+let html =
+  "✅ Wallet connected.<br><br>" +
+  "🔎 Transactions found: " + transactions.length + "<br><br>";
+
+transactions.forEach((tx, index) => {
+  html +=
+    "<b>Transaction " + (index + 1) + "</b><br>" +
+    "Signature: " + tx.signature + "<br><br>";
+});
+
+status.innerHTML = html;
+      
+      
+      
 
   }
 
