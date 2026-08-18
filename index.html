@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Jeremiah Coin Alerts</title>
+  <style>
+    body{font-family:system-ui;background:#0d0f12;color:#fff;margin:0}
+    .wrap{max-width:760px;margin:auto;padding:18px}
+    h1{margin:0 0 6px}.sub{color:#9aa4af;margin-bottom:18px}
+    .card{background:#171a20;border:1px solid #2b313a;border-radius:16px;padding:14px;margin:12px 0}
+    input,button{font-size:16px;border-radius:12px;padding:13px}
+    input{width:calc(100% - 28px);background:#0f1217;color:#fff;border:1px solid #39414d}
+    button{margin-top:10px;background:#ff7a00;color:#111;border:0;font-weight:700;width:100%}
+    .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .sig{font-family:monospace;font-size:12px;color:#8ec5ff;word-break:break-all}
+    .ok{color:#37d67a}.bad{color:#ff6b6b}.muted{color:#8d98a5}
+    a{color:#8ec5ff}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Jeremiah Coin Alerts</h1>
+  <div class="sub">Track public Solana wallets. No seed phrase or private key needed.</div>
+
+  <div class="card">
+    <label>Solana wallet address</label>
+    <input id="wallet" placeholder="Paste public wallet address">
+    <button id="start">Start Tracking</button>
+    <div id="status" class="muted" style="margin-top:10px"></div>
+  </div>
+
+  <div id="feed"></div>
+</div>
+
+<script>
+let timer=null, seen=new Set();
+
+function short(s){return s ? s.slice(0,6)+"…"+s.slice(-6) : ""}
+function when(ts){return ts ? new Date(ts*1000).toLocaleString() : "Unknown time"}
+
+async function load(){
+  const w=document.getElementById("wallet").value.trim();
+  if(!w) return;
+  const status=document.getElementById("status");
+  status.textContent="Checking wallet…";
+  try{
+    const r=await fetch("/api/wallet/"+encodeURIComponent(w));
+    const data=await r.json();
+    if(!r.ok) throw new Error(data.error || "Request failed");
+
+    const feed=document.getElementById("feed");
+    feed.innerHTML="";
+    for(const t of data.transactions){
+      const fresh=!seen.has(t.signature);
+      if(fresh && seen.size && Notification.permission==="granted"){
+        new Notification("Jeremiah Coin Alerts", {body:"New Solana transaction from "+short(w)});
+      }
+      seen.add(t.signature);
+
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`
+        <div class="row">
+          <strong>${t.err ? "Failed transaction" : "Successful transaction"}</strong>
+          <span class="${t.err ? "bad":"ok"}">${t.err ? "FAILED":"SUCCESS"}</span>
+        </div>
+        <div class="muted">${when(t.blockTime)}</div>
+        <div class="sig">${t.signature}</div>
+        <div style="margin-top:8px">
+          <a target="_blank" href="https://solscan.io/tx/${t.signature}">Open on Solscan</a>
+        </div>`;
+      feed.appendChild(div);
+    }
+    status.textContent="Tracking active. Refreshes every 20 seconds.";
+  }catch(e){
+    status.textContent="Error: "+e.message;
+  }
+}
+
+document.getElementById("start").onclick=async()=>{
+  if("Notification" in window && Notification.permission==="default"){
+    await Notification.requestPermission();
+  }
+  if(timer) clearInterval(timer);
+  seen.clear();
+  await load();
+  timer=setInterval(load,20000);
+};
+</script>
+</body>
+</html>
