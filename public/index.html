@@ -191,7 +191,9 @@ async function trackWallet() {
 
     const data = await response.json();
 
-    status.innerHTML =
+    const transactions = data.transactions || [];
+
+status.innerHTML =
       "✅ Wallet connected.<br><br>" +
       "Transactions found: " +
       (data.transactions?.length ?? data.length ?? 0);
