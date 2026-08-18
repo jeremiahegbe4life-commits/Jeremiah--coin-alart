@@ -198,10 +198,23 @@ let html =
   "🔎 Transactions found: " + transactions.length + "<br><br>";
 
 transactions.forEach((tx, index) => {
+  const time = tx.blockTime
+    ? new Date(tx.blockTime * 1000).toLocaleString()
+    : "Unknown time";
+
+  const result = tx.err ? "❌ Failed" : "✅ Successful";
+
   html +=
     "<b>Transaction " + (index + 1) + "</b><br>" +
-    "Signature: " + tx.signature + "<br><br>";
+    "⏰ Time: " + time + "<br>" +
+    "Status: " + result + "<br>" +
+    "<a href='https://solscan.io/tx/" + tx.signature +
+    "' target='_blank'>🔎 View on Solscan</a><br><br>";
 });
+  
+  
+  
+
 
 status.innerHTML = html;
       
